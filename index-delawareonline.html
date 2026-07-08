@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIAA Division Realignment</title>
+<!-- delawareonline font stack - no external font needed, using system fonts -->
+<style>
+/* ── TOKENS ───────────────────────────────────────────────────── */
+:root, [data-theme="light"] {
+  --bg:       #f7f6f2;
+  --surface:  #ffffff;
+  --surface2: #f3f0ec;
+  --border:   oklch(from #28251d l c h / 0.12);
+  --divider:  oklch(from #28251d l c h / 0.07);
+  --text:     #1a1916;
+  --muted:    #6b6a66;
+  --faint:    #b0afa9;
+  --primary:       #01696f;
+  --primary-hover: #0c4e54;
+  --primary-text:  #ffffff;
+  --d1-bg:  #e4f2f1; --d1-fg: #015a5f;
+  --d2-bg:  #fdf0e6; --d2-fg: #7a3a10;
+  --chg-bg: #fef9e7; --chg-fg: #92700a;
+  --r-sm: 4px; --r-md: 6px; --r-lg: 10px; --r-full: 9999px;
+  --shadow: 0 1px 3px oklch(0.2 0.01 80 / 0.09), 0 4px 12px oklch(0.2 0.01 80 / 0.06);
+  --ease: 160ms cubic-bezier(0.16,1,0.3,1);
+}
+[data-theme="dark"] {
+  --bg:       #141311;
+  --surface:  #1c1b19;
+  --surface2: #242320;
+  --border:   oklch(from #cdccca l c h / 0.14);
+  --divider:  oklch(from #cdccca l c h / 0.07);
+  --text:     #d0cfc9;
+  --muted:    #7a7975;
+  --faint:    #4e4d4a;
+  --primary:       #4f98a3;
+  --primary-hover: #3e8592;
+  --primary-text:  #0f1e20;
+  --d1-bg:  #1b2e30; --d1-fg: #5db3bf;
+  --d2-bg:  #2a1e14; --d2-fg: #d4845a;
+  --chg-bg: #272010; --chg-fg: #d4a830;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --bg:#141311;--surface:#1c1b19;--surface2:#242320;
+    --border:oklch(from #cdccca l c h / 0.14);--divider:oklch(from #cdccca l c h / 0.07);
+    --text:#d0cfc9;--muted:#7a7975;--faint:#4e4d4a;
+    --primary:#4f98a3;--primary-hover:#3e8592;--primary-text:#0f1e20;
+    --d1-bg:#1b2e30;--d1-fg:#5db3bf;--d2-bg:#2a1e14;--d2-fg:#d4845a;
+    --chg-bg:#272010;--chg-fg:#d4a830;
+  }
+}
+
+/* ── RESET ──────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;font-size:14px}
+body{font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5;color:var(--text);background:var(--bg)}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+select{font:inherit;color:inherit}
+table{border-collapse:collapse;width:100%}
+input{font:inherit;color:inherit}
+
+/* ── SHELL ──────────────────────────────────────────────────────── */
+.embed{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  font-size:13px;
+}
+
+/* ── TOPBAR ─────────────────────────────────────────────────────── */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px 0;
+  gap:8px;
+}
+.embed-label{
+  font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);
+}
+.theme-btn{
+  width:28px;height:28px;border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);
+  transition:background var(--ease),color var(--ease);
+}
+.theme-btn:hover{background:var(--surface2);color:var(--text)}
+
+/* ── PRIMARY NAV TABS ───────────────────────────────────────────── */
+.nav-tabs{
+  display:flex;gap:0;padding:0 14px;
+  border-bottom:1px solid var(--border);
+  margin-top:6px;
+}
+.nav-tab{
+  padding:8px 12px;font-size:12px;font-weight:500;
+  color:var(--muted);border-bottom:2px solid transparent;
+  white-space:nowrap;
+  transition:color var(--ease),border-color var(--ease);
+  margin-bottom:-1px;
+}
+.nav-tab:hover{color:var(--text)}
+.nav-tab.active{color:var(--primary);border-color:var(--primary)}
+
+/* ── PANELS ─────────────────────────────────────────────────────── */
+.panel{display:none;padding:12px 14px 14px}
+.panel.active{display:block}
+
+/* ── SPORT CONTROLS ─────────────────────────────────────────────── */
+.sport-controls{
+  display:flex;align-items:center;gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+.sport-select-wrap{position:relative;flex:1;min-width:160px;max-width:280px}
+.sport-select-wrap::after{
+  content:'';position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  border:4px solid transparent;border-top:5px solid var(--muted);
+  pointer-events:none;margin-top:2px;
+}
+.sport-select{
+  width:100%;appearance:none;
+  padding:6px 28px 6px 10px;
+  border:1px solid var(--border);border-radius:2px;
+  background:var(--surface);font-size:13px;font-weight:500;
+  cursor:pointer;
+  transition:border-color var(--ease),box-shadow var(--ease);
+}
+.sport-select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px oklch(from var(--primary) l c h / 0.18)}
+
+.era-toggle{
+  display:flex;border:1px solid var(--border);
+  border-radius:2px;overflow:hidden;flex-shrink:0;
+}
+.era-btn{
+  padding:6px 10px;font-size:12px;font-weight:500;
+  color:var(--muted);white-space:nowrap;
+  transition:background var(--ease),color var(--ease);
+}
+.era-btn.active{background:var(--primary);color:var(--primary-text)}
+.era-btn:not(.active):hover{background:var(--surface2);color:var(--text)}
+
+/* ── DIVISION GRID ──────────────────────────────────────────────── */
+.div-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.div-col{border-radius:2px;border:1px solid var(--border);overflow:hidden}
+.div-head{
+  padding:5px 10px;font-size:11px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;
+}
+.div-head.d1{background:var(--d1-bg);color:var(--d1-fg)}
+.div-head.d2{background:var(--d2-bg);color:var(--d2-fg)}
+.div-body{background:var(--bg)}
+.school-row{
+  padding:3px 10px;font-size:12px;color:var(--text);
+  border-bottom:1px solid var(--divider);
+}
+.school-row:last-child{border-bottom:none}
+
+/* Note box */
+.note{
+  font-size:11px;color:var(--muted);
+  background:var(--surface2);border-radius:2px;
+  padding:6px 10px;margin-bottom:10px;
+  line-height:1.4;
+}
+
+/* ── BY SCHOOL ──────────────────────────────────────────────────── */
+.search-wrap{position:relative;margin-bottom:10px;max-width:280px}
+.search-wrap svg{
+  position:absolute;left:8px;top:50%;transform:translateY(-50%);
+  color:var(--faint);pointer-events:none;
+}
+.school-search{
+  width:100%;padding:6px 8px 6px 28px;
+  border:1px solid var(--border);border-radius:2px;
+  background:var(--surface);font-size:13px;
+  transition:border-color var(--ease),box-shadow var(--ease);
+}
+.school-search:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px oklch(from var(--primary) l c h / 0.18)}
+.school-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:8px}
+.school-card{border-radius:2px !important;
+  border:1px solid var(--border);border-radius:2px;
+  overflow:hidden;background:var(--bg);
+}
+.sc-name{
+  padding:5px 10px;font-weight:600;font-size:12px;
+  background:var(--surface2);border-bottom:1px solid var(--divider);
+}
+.sc-body{padding:7px 10px;display:flex;flex-direction:column;gap:6px}
+.sc-era{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:2px}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:var(--r-full);font-size:11px;font-weight:600}
+.badge.d1{background:var(--d1-bg);color:var(--d1-fg)}
+.badge.d2{background:var(--d2-bg);color:var(--d2-fg)}
+.badge.chg{background:var(--chg-bg);color:var(--chg-fg);font-size:10px;padding:1px 5px}
+.sc-divider{border:none;border-top:1px solid var(--divider);margin:2px 0}
+.sport-line{display:flex;align-items:center;justify-content:space-between;font-size:11px;padding:1px 0}
+.sport-line-name{color:var(--muted)}
+.sport-line-right{display:flex;align-items:center;gap:3px}
+.no-results{text-align:center;color:var(--muted);font-size:12px;padding:24px 0}
+
+/* ── OVERVIEW TABLE ─────────────────────────────────────────────── */
+.ov-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ov-scroll::-webkit-scrollbar{height:4px}
+.ov-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.ov-table{font-size:11px;min-width:660px}
+.ov-table th{
+  padding:5px 8px;text-align:left;font-weight:600;font-size:10px;
+  background:var(--surface2);border-bottom:1px solid var(--border);
+  white-space:nowrap;position:sticky;top:0;z-index:1;
+  letter-spacing:.03em;
+}
+.ov-table td{padding:4px 8px;border-bottom:1px solid var(--divider);vertical-align:middle}
+.ov-table tr:hover td{background:var(--surface2)}
+.ov-table td:first-child{font-weight:500;white-space:nowrap}
+.mini{font-size:10px;padding:1px 6px;border-radius:var(--r-full);font-weight:600;white-space:nowrap}
+.mini.d1{background:var(--d1-bg);color:var(--d1-fg)}
+.mini.d2{background:var(--d2-bg);color:var(--d2-fg)}
+.mini.na{color:var(--faint)}
+
+/* ── FOOTER ─────────────────────────────────────────────────────── */
+.embed-footer{
+  border-top:1px solid var(--divider);
+  padding:5px 14px;font-size:10px;color:var(--faint);
+  background:var(--surface2);display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+.embed-footer a{color:var(--faint);text-decoration:underline}
+
+/* ── RESPONSIVE ─────────────────────────────────────────────────── */
+@media(max-width:500px){
+  .div-grid{grid-template-columns:1fr}
+  .sport-controls{flex-direction:column;align-items:flex-start}
+  .era-toggle{width:100%}
+  .era-btn{flex:1;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<div class="embed" id="embed">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <span class="embed-label">DIAA Division Realignment</span>
+    <button class="theme-btn" data-theme-toggle aria-label="Toggle dark mode">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+
+  <!-- PRIMARY NAV -->
+  <nav class="nav-tabs" role="tablist">
+    <button class="nav-tab active" data-tab="sport" role="tab" aria-selected="true">By Sport</button>
+    <button class="nav-tab" data-tab="school" role="tab" aria-selected="false">By School</button>
+    </nav>
+
+  <!-- ── PANEL: BY SPORT ── -->
+  <section class="panel active" id="panel-sport">
+    <div class="sport-controls">
+      <div class="sport-select-wrap">
+        <select class="sport-select" id="sport-select" aria-label="Select sport"></select>
+      </div>
+      <div id="era-toggle-row"><div class="era-toggle" role="group" aria-label="Alignment period">
+        <button class="era-btn" data-era="2025" aria-pressed="false">2025–27 Current</button>
+        <button class="era-btn active" data-era="2027" aria-pressed="true">2027–28 New</button>
+      </div></div>
+    </div>
+    <div id="sport-display"></div>
+  </section>
+
+  <!-- ── PANEL: BY SCHOOL ── -->
+  <section class="panel" id="panel-school">
+    <div class="search-wrap">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="search" class="school-search" id="school-search" placeholder="Search schools…" autocomplete="off">
+    </div>
+    <div class="school-grid" id="school-grid"></div>
+    <div class="no-results" id="no-results" style="display:none">No schools match.</div>
+  </section>
+
+  <!-- FOOTER -->
+  <div class="embed-footer">
+    <span>Source: <a href="https://education.delaware.gov/diaa/governance/school_classification/" target="_blank" rel="noopener">DIAA</a></span>
+  </div>
+
+</div><!-- /embed -->
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+
+// 2025–2027: enrollment threshold 1,104. Same division for all non-football sports.
+const D1_2025 = new Set([
+  "Appoquinimink","Caesar Rodney","Cape Henlopen","Charter of Wilmington",
+  "Christiana","Delcastle","Dover","Hodgson","Middletown","Milford",
+  "Odessa","Padua","Polytech","Salesianum","Smyrna","St. Georges Tech",
+  "Sussex Central","Sussex Tech","William Penn"
+]);
+
+// 2027–28: sport-specific. Source: DIAA Board-approved PDF, 6.11.2026
+// ── 2025-27 DATA (sport-specific, exact rosters) ──────────────────────────
+const DATA_2025 = {
+  "Field Hockey": {
+    season: "Fall",
+    d1: ["Appoquinimink","Caesar Rodney","Cape Henlopen","Charter of Wilmington","Christiana","Delcastle","Dover","Hodgson","Middletown","Milford","Odessa","Padua","Polytech","Smyrna","St. Georges","Sussex Central","Sussex Tech","William Penn"],
+    d2: ["Archmere","Brandywine","Caravel","Concord","Conrad","Delmar","Delmarva Christian","DMA","Indian River","Lake Forest","Laurel","MOT Charter","Mount Pleasant","Newark","Newark Charter","Sanford","Seaford","St. Andrew's","Sussex Academy","Tatnall","Tower Hill","Ursuline","Wilmington Christian","Wilmington Friends","Woodbridge","Saint Mark's"]
+  },
+  "Boys Soccer": {
+    season: "Fall",
+    d1: ["Appoquinimink","Caesar Rodney","Cape Henlopen","Charter of Wilmington","Christiana","Delcastle","Dover","Hodgson","Middletown","Milford","Odessa","Polytech","Salesianum","Smyrna","St. Georges","Sussex Central","Sussex Tech","William Penn"],
+    d2: ["A.I. du Pont","Archmere","Aspira","Caravel","Concord","Conrad","Delmar","Delmarva Christian","DMA","Dickinson","Glasgow","Howard","Indian River","Lake Forest","Laurel","McKean","MOT Charter","Mount Pleasant","Newark","Newark Charter","Odyssey Charter","Red Lion Christian","Sanford","Seaford","St. Andrew's","St. Elizabeth","Sussex Academy","Tatnall","Tower Hill","Wilmington Christian","Wilmington Friends","Woodbridge","Saint Mark's"]
+  },
+  "Girls Volleyball": {
+    season: "Fall",
+    combined: ["A.I. du Pont","Appoquinimink","Archmere","Aspira","Brandywine","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Christiana","Concord","Conrad","Delcastle","Delmar","Delmarva Christian","Dickinson","DMA","Dover","Early College@DSU","First State Military Academy","Glasgow","Hodgson","Howard","Indian River","Lake Forest","Laurel","McKean","Middletown","Milford","MOT Charter","Mount Pleasant","Newark","Newark Charter","Odessa","Odyssey Charter","Padua","Polytech","Red Lion Christian","Sanford","Seaford","Smyrna","St. Andrew's","St. Elizabeth","St. Georges","Saint Mark's","Sussex Academy","Sussex Central","Sussex Tech","Tatnall","Tower Hill","Ursuline","William Penn","Wilmington Christian","Wilmington Friends","Woodbridge"]
+  },
+  "Boys Basketball": {
+    season: "Winter",
+    combined: ["A.I. du Pont","Appoquinimink","Archmere","Aspira","Brandywine","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Christiana","Concord","Conrad","Delcastle","Delmar","Delmarva Christian","Dickinson","DMA","Dover","Early College@DSU","First State Military Academy","Freire Charter","Glasgow","Great Oaks","Hodgson","Howard","Indian River","Lake Forest","Laurel","McKean","Middletown","Milford","MOT Charter","Mount Pleasant","Newark","Newark Charter","Odessa","Odyssey Charter","Polytech","Red Lion Christian","Salesianum","Sanford","Seaford","Smyrna","St. Andrew's","St. Elizabeth","St. Georges","Saint Mark's","Sussex Academy","Sussex Central","Sussex Tech","Tatnall","Tower Hill","William Penn","Wilmington Christian","Wilmington Friends","Woodbridge"]
+  },
+  "Girls Basketball": {
+    season: "Winter",
+    combined: ["A.I. du Pont","Appoquinimink","Archmere","Brandywine","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Christiana","Concord","Conrad","Delcastle","Delmar","Delmarva Christian","DMA","Dover","Early College@DSU","Glasgow","Hodgson","Howard","Indian River","Lake Forest","Laurel","McKean","Middletown","Milford","MOT Charter","Mount Pleasant","Newark","Newark Charter","Odessa","Odyssey Charter","Padua","Polytech","Red Lion Christian","Sanford","Seaford","Smyrna","St. Andrew's","St. Elizabeth","St. Georges","Saint Mark's","Sussex Academy","Sussex Central","Sussex Tech","Tatnall","Tower Hill","Ursuline","William Penn","Wilmington Friends","Woodbridge"]
+  },
+  "Baseball": {
+    season: "Spring",
+    combined: ["Appoquinimink","Archmere","Aspira","Brandywine","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Christiana","Concord","Conrad","Delcastle","Delmar","Delmarva Christian","Dickinson","DMA","Dover","First State Military Academy","Hodgson","Indian River","Lake Forest","Laurel","McKean","Middletown","Milford","MOT Charter","Mount Pleasant","Newark","Newark Charter","Odessa","Odyssey Charter","Polytech","Red Lion Christian","Salesianum","Sanford","Seaford","Smyrna","St. Andrew's","St. Elizabeth","St. Georges","Saint Mark's","Sussex Academy","Sussex Central","Sussex Tech","Tatnall","Tower Hill","William Penn","Wilmington Friends","Woodbridge"]
+  },
+  "Boys Lacrosse": {
+    season: "Spring",
+    combined: ["Appoquinimink","Archmere","Brandywine","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Concord","Conrad","Delcastle","Delmar","DMA","Dover","First State Military Academy","Hodgson","Indian River","Lake Forest","McKean","Middletown","Milford","MOT Charter","Mount Pleasant","Newark Charter","Odessa","Polytech","Red Lion Christian","Salesianum","Sanford","Smyrna","St. Andrew's","St. Georges","Saint Mark's","Sussex Academy","Sussex Central","Sussex Tech","Tatnall","Tower Hill","Wilmington Christian","Wilmington Friends","Woodbridge"]
+  },
+  "Girls Lacrosse": {
+    season: "Spring",
+    combined: ["Appoquinimink","Archmere","Brandywine","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Christiana","Concord","Conrad","DMA","Dover","Hodgson","Indian River","Lake Forest","Middletown","Milford","Mount Pleasant","Newark Charter","Odessa","Padua","Polytech","Sanford","Smyrna","St. Andrew's","St. Georges","Saint Mark's","Sussex Academy","Tatnall","Tower Hill","Ursuline","Wilmington Friends"]
+  },
+  "Girls Soccer": {
+    season: "Spring",
+    d1: ["Appoquinimink","Caesar Rodney","Cape Henlopen","Charter of Wilmington","Christiana","Delcastle","Dover","Hodgson","Middletown","Milford","Odessa","Padua","Polytech","Smyrna","St. Georges","Sussex Central","Sussex Tech","William Penn"],
+    d2: ["Archmere","Aspira","Brandywine","Caravel","Concord","Conrad","Delmar","Delmarva Christian","Dickinson","DMA","Early College@DSU","First State Military Academy","Glasgow","Howard","Indian River","Lake Forest","Laurel","McKean","MOT Charter","Mount Pleasant","Newark","Newark Charter","Odyssey Charter","Red Lion Christian","Sanford","Seaford","St. Andrew's","Sussex Academy","Tatnall","Tower Hill","Ursuline","Wilmington Christian","Wilmington Friends","Woodbridge","Saint Mark's"]
+  },
+  "Softball": {
+    season: "Spring",
+    combined: ["Appoquinimink","Archmere","Brandywine","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Christiana","Concord","Conrad","Delcastle","Delmar","Delmarva Christian","Dickinson","DMA","Dover","Early College@DSU","First State Military Academy","Glasgow","Hodgson","Indian River","Lake Forest","Laurel","McKean","Middletown","Milford","MOT Charter","Mount Pleasant","Newark","Newark Charter","Odessa","Odyssey Charter","Padua","Polytech","Red Lion Christian","Sanford","Seaford","Smyrna","St. Georges","Saint Mark's","Sussex Academy","Sussex Central","Sussex Tech","Ursuline","William Penn","Woodbridge","Charter of Wilmington"]
+  },
+  "Boys Volleyball": {
+    season: "Spring",
+    combined: ["A.I. du Pont","Appoquinimink","Archmere","Aspira","Brandywine","Caesar Rodney","Cape Henlopen","Charter of Wilmington","Christiana","Concord","Conrad","Delcastle","Delmarva Christian","Dickinson","DMA","Dover","Glasgow","Indian River","McKean","Middletown","MOT Charter","Mount Pleasant","Newark","Newark Charter","Odessa","Odyssey Charter","Red Lion Christian","Salesianum","Saint Mark's","Smyrna","St. Georges","Sussex Academy","William Penn"]
+  }
+};
+
+// ── 2027-28 DATA (sport-specific, Board approved 6.11.2026) ──────────────────
+const DATA_2027 = {
+  "Field Hockey": {
+    season: "Fall",
+    d1: ["Appoquinimink","Archmere","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Concord","Delcastle","Delmar","Indian River","Lake Forest","Middletown","Milford","Newark Charter","Odessa","Padua","Saint Mark's","Smyrna","St. Georges","Sussex Academy","Sussex Tech","Ursuline","Wilmington Friends"],
+    d2: ["Brandywine","Christiana","Conrad","Delmarva Christian","Dickinson","DMA","Dover","Hodgson","Laurel","McKean","MOT Charter","Mount Pleasant","Newark","Polytech","Sanford","Seaford","St. Andrew's","St. Elizabeth","Sussex Central","Tatnall","Tower Hill","William Penn","Wilmington Christian","Woodbridge"]
+  },
+  "Boys Soccer": {
+    season: "Fall",
+    d1: ["Appoquinimink","Aspira","Brandywine","Caesar Rodney","Cape Henlopen","Charter of Wilmington","Christiana","Concord","Conrad","Delcastle","Dickinson","Dover","Glasgow","Indian River","Middletown","Milford","Newark Charter","Saint Mark's","Salesianum","Sanford","St. Georges","Sussex Academy","Sussex Central","Tower Hill","William Penn"],
+    d2: ["A.I. du Pont","Archmere","Caravel","Delmar","Delmarva Christian","DMA","First State Military Academy","Hodgson","Howard","Lake Forest","Laurel","McKean","MOT Charter","Mount Pleasant","Newark","Odessa","Odyssey Charter","Polytech","Red Lion Christian","Seaford","Smyrna","St. Andrew's","St. Elizabeth","Sussex Tech","Tatnall","Wilmington Christian","Wilmington Friends","Woodbridge"]
+  },
+  "Girls Volleyball": {
+    season: "Fall",
+    d1: ["Appoquinimink","Archmere","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Christiana","Dickinson","Dover","Indian River","Lake Forest","Middletown","MOT Charter","Mount Pleasant","Newark Charter","Odessa","Padua","Polytech","Saint Mark's","Smyrna","St. Georges","Sussex Academy","Sussex Central","Tower Hill","Ursuline","Wilmington Christian"],
+    d2: ["A.I. du Pont","Aspira","Brandywine","Conrad","Delcastle","Delmar","Delmarva Christian","DMA","Early College@DSU","First State Military Academy","Glasgow","Hodgson","Howard","Laurel","McKean","Milford","Newark","Odyssey Charter","Red Lion Christian","Sanford","Seaford","St. Andrew's","St. Elizabeth","Sussex Tech","Tatnall","William Penn","Wilmington Friends","Woodbridge"]
+  },
+  "Boys Basketball": {
+    season: "Winter",
+    d1: ["Appoquinimink","Archmere","Cape Henlopen","Caravel","Conrad","Delmarva Christian","Dickinson","Dover","Howard","Lake Forest","Laurel","Middletown","Milford","MOT Charter","Odessa","Saint Mark's","Salesianum","Sanford","Seaford","Smyrna","St. Elizabeth","St. Georges","Sussex Central","William Penn","Wilmington Friends","Woodbridge"],
+    d2: ["A.I. du Pont","Aspira","Brandywine","Caesar Rodney","Charter of Wilmington","Christiana","Concord","Delcastle","Delmar","DMA","Early College@DSU","First State Military Academy","Freire Charter","Glasgow","Great Oaks","Hodgson","Indian River","McKean","Mount Pleasant","Newark","Newark Charter","Odyssey Charter","Polytech","Red Lion Christian","St. Andrew's","Sussex Academy","Sussex Tech","Tatnall","Tower Hill","Wilmington Christian"]
+  },
+  "Girls Basketball": {
+    season: "Winter",
+    d1: ["Appoquinimink","Archmere","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Concord","Delcastle","Delmarva Christian","DMA","Dover","Early College@DSU","Hodgson","Howard","Indian River","Middletown","Padua","Polytech","Sanford","Smyrna","St. Elizabeth","St. Georges","Sussex Tech","Tatnall","Ursuline","Wilmington Friends"],
+    d2: ["A.I. du Pont","Brandywine","Charter of Wilmington","Christiana","Conrad","Delmar","First State Military Academy","Glasgow","Lake Forest","Laurel","McKean","Milford","MOT Charter","Mount Pleasant","Newark","Newark Charter","Odessa","Odyssey Charter","Red Lion Christian","Seaford","St. Andrew's","Saint Mark's","Sussex Academy","Sussex Central","Tower Hill","William Penn","Woodbridge"]
+  },
+  "Baseball": {
+    season: "Spring",
+    d1: ["Appoquinimink","Archmere","Caesar Rodney","Cape Henlopen","Caravel","Concord","Conrad","DMA","Dover","Indian River","Lake Forest","Newark Charter","Odessa","Polytech","Red Lion Christian","Saint Mark's","Salesianum","Sanford","St. Georges","Sussex Central","Sussex Tech","William Penn","Woodbridge"],
+    d2: ["A.I. du Pont","Aspira","Brandywine","Charter of Wilmington","Christiana","Delcastle","Delmar","Delmarva Christian","Dickinson","First State Military Academy","Glasgow","Hodgson","Laurel","McKean","Middletown","Milford","MOT Charter","Mount Pleasant","Newark","Odyssey Charter","Seaford","Smyrna","St. Andrew's","St. Elizabeth","Sussex Academy","Tatnall","Tower Hill","Wilmington Friends"]
+  },
+  "Boys Lacrosse": {
+    season: "Spring",
+    d1: ["Appoquinimink","Archmere","Brandywine","Caesar Rodney","Cape Henlopen","Charter of Wilmington","Indian River","Middletown","Milford","Odessa","Polytech","Salesianum","Saint Mark's","Smyrna","St. Andrew's","St. Georges","Sussex Academy","Tatnall","Wilmington Friends"],
+    d2: ["Caravel","Concord","Conrad","Delcastle","Delmar","DMA","Dover","First State Military Academy","Hodgson","Lake Forest","McKean","MOT Charter","Mount Pleasant","Newark Charter","Red Lion Christian","Sanford","Sussex Central","Sussex Tech","Tower Hill","Wilmington Christian","Woodbridge"]
+  },
+  "Girls Lacrosse": {
+    season: "Spring",
+    d1: ["Archmere","Brandywine","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Concord","Indian River","Milford","Odessa","Smyrna","Sussex Academy","Tatnall","Tower Hill","Wilmington Friends"],
+    d2: ["Appoquinimink","Christiana","Conrad","DMA","Dover","Hodgson","Lake Forest","Middletown","Mount Pleasant","Newark","Newark Charter","Padua","Polytech","Saint Mark's","Sanford","St. Andrew's","St. Georges","Ursuline"]
+  },
+  "Girls Soccer": {
+    season: "Spring",
+    d1: ["Appoquinimink","Archmere","Brandywine","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Concord","Delcastle","Delmar","Hodgson","Indian River","Lake Forest","Middletown","Newark Charter","Odessa","Padua","Polytech","Saint Mark's","Smyrna","St. Andrew's","St. Georges","Sussex Academy","Sussex Central","Sussex Tech","Ursuline","Wilmington Friends"],
+    d2: ["A.I. du Pont","Aspira","Christiana","Conrad","Delmarva Christian","Dickinson","DMA","Dover","Early College@DSU","First State Military Academy","Glasgow","Howard","Laurel","McKean","Milford","MOT Charter","Mount Pleasant","Newark","Odyssey Charter","Red Lion Christian","Sanford","Seaford","Tatnall","Tower Hill","William Penn","Wilmington Christian","Woodbridge"]
+  },
+  "Softball": {
+    season: "Spring",
+    d1: ["Appoquinimink","Brandywine","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Concord","Delmar","DMA","Hodgson","Indian River","Lake Forest","Middletown","Milford","Odessa","Padua","Polytech","Saint Mark's","Smyrna","Sussex Academy","Sussex Central","Sussex Tech"],
+    d2: ["Archmere","Christiana","Conrad","Delcastle","Delmarva Christian","Dickinson","Dover","First State Military Academy","Glasgow","Laurel","McKean","MOT Charter","Mount Pleasant","Newark","Newark Charter","Odyssey Charter","Red Lion Christian","Seaford","St. Georges","Ursuline","William Penn","Woodbridge"]
+  },
+  "Boys Volleyball": {
+    season: "Spring",
+    d1: ["Appoquinimink","Brandywine","Caesar Rodney","Cape Henlopen","Charter of Wilmington","Concord","Delcastle","Dover","Indian River","Middletown","Mount Pleasant","Newark Charter","Odessa","Odyssey Charter","Salesianum","William Penn"],
+    d2: ["A.I. du Pont","Archmere","Aspira","Christiana","Conrad","Delmarva Christian","Dickinson","DMA","Glasgow","McKean","MOT Charter","Newark","Red Lion Christian","Saint Mark's","Smyrna","St. Georges","Sussex Academy","Tatnall"]
+  }
+};
+
+// ── FOOTBALL (static, no 2027-28 change) ─────────────────────────────────────
+const FOOTBALL = {
+  "3A": {
+    "3A-1": ["Appoquinimink","Hodgson","Middletown","Salesianum","William Penn"],
+    "3A-2": ["Caesar Rodney","Cape Henlopen","Dover","Smyrna","St. Georges","Sussex Central"]
+  },
+  "2A": {
+    "2A-1": ["Archmere","Howard","Mount Pleasant","Tatnall","Tower Hill","Wilmington Friends"],
+    "2A-2": ["DMA","Milford","Odessa","Polytech","Red Lion Christian","Saint Mark's"],
+    "2A-3": ["Delmar","Indian River","Lake Forest","Laurel","Sussex Tech","Woodbridge"]
+  },
+  "1A": {
+    "1A-1": ["A.I. du Pont","Brandywine","Concord","Dickinson","McKean","St. Elizabeth"],
+    "1A-2": ["Charter of Wilmington","Christiana","Conrad","Delcastle","Glasgow","Newark"],
+    "1A-3": ["Early College@DSU","First State Military Academy","Newark Charter","Seaford","St. Andrew's"]
+  }
+};
+
+// ── STATIC SPORTS (no change between eras, individual+team) ──────────────────
+const STATIC_SPORTS = {
+  "Cross Country": {
+    season: "Fall",
+    d1: ["Appoquinimink","Caesar Rodney","Cape Henlopen","Charter of Wilmington","Christiana","Delcastle","Dover","Hodgson","Middletown","Milford","Odessa","Padua","Polytech","Smyrna","St. Georges","Sussex Central","Sussex Tech","William Penn"],
+    d2: ["A.I. du Pont","Archmere","Aspira","Brandywine","Caravel","Concord","Conrad","Delmar","Delmarva Christian","DMA","Dickinson","First State Military Academy","Howard","Indian River","Lake Forest","Laurel","MOT Charter","Mount Pleasant","Newark","Newark Charter","Saint Mark's","Sanford","Seaford","Sussex Academy","St. Andrew's","Tatnall","Tower Hill","Ursuline","Wilmington Christian","Wilmington Friends","Woodbridge"]
+  },
+  "Indoor Track & Field": {
+    season: "Winter",
+    combined: ["A.I. du Pont","Appoquinimink","Archmere","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Christiana","Conrad","Delcastle","Dover","Glasgow","Hodgson","Howard","Lake Forest","Middletown","Milford","Mount Pleasant","Newark","Newark Charter","Odessa","Padua","Polytech","Saint Mark's","Salesianum","Smyrna","St. Andrew's","St. Elizabeth","St. Georges","Sussex Academy","Sussex Central","Sussex Tech","Tatnall","Tower Hill","Ursuline","Wilmington Christian","Wilmington Friends"]
+  },
+  "Wrestling": {
+    season: "Winter",
+    d1: ["Appoquinimink","Caesar Rodney","Cape Henlopen","Charter of Wilmington","Christiana","Delcastle","Dover","Hodgson","Middletown","Milford","Odessa","Polytech","Salesianum","Smyrna","St. Georges","Sussex Central","Sussex Tech","William Penn"],
+    d2: ["A.I. du Pont","Archmere","Brandywine","Caravel","Conrad","Delmar","Dickinson","DMA","First State Military Academy","Glasgow","Howard","Indian River","Lake Forest","Laurel","McKean","Mount Pleasant","Newark","Newark Charter","Odyssey Charter","Red Lion Christian","Saint Mark's","Sanford","Seaford","St. Andrew's","St. Elizabeth","Sussex Academy","Tatnall","Tower Hill","Wilmington Christian","Wilmington Friends","Woodbridge"]
+  },
+  "Swimming": {
+    season: "Winter",
+    combined: ["A.I. du Pont","Appoquinimink","Archmere","Brandywine","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Christiana","Concord","Conrad","Delmarva Christian","Dickinson","DMA","Dover","Glasgow","Indian River","Lake Forest","McKean","Middletown","Milford","MOT Charter","Mount Pleasant","Mt. Sophia Academy","Newark","Newark Charter","Odessa","Padua","Polytech","Saint Mark's","Salesianum","Sanford","Seaford","Sussex Academy","Sussex Central","Sussex Tech","Tatnall","Tower Hill","Ursuline","William Penn","Wilmington Christian","Wilmington Friends"]
+  },
+  "Outdoor Track & Field": {
+    season: "Spring",
+    d1: ["Appoquinimink","Caesar Rodney","Cape Henlopen","Charter of Wilmington","Christiana","Delcastle","Dover","Hodgson","Middletown","Milford","Odessa","Padua","Polytech","Salesianum","Smyrna","St. Georges","Sussex Central","Sussex Tech","William Penn"],
+    d2: ["A.I. du Pont","Archmere","Brandywine","Caravel","Concord","Conrad","DMA","Dickinson","Early College@DSU","First State Military Academy","Glasgow","Howard","Indian River","Lake Forest","Laurel","McKean","Mount Pleasant","Newark","Newark Charter","Odyssey Charter","Red Lion Christian","Saint Mark's","Sanford","Sussex Academy","Tatnall","Tower Hill","Ursuline","Wilmington Christian","Wilmington Friends","Woodbridge"]
+  },
+  "Tennis": {
+    season: "Spring",
+    combined: ["A.I. du Pont","Appoquinimink","Archmere","Brandywine","Caesar Rodney","Cape Henlopen","Charter of Wilmington","Christiana","Concord","Conrad","DMA","Dickinson","Dover","Glasgow","Indian River","Lake Forest","McKean","Middletown","Milford","Mount Pleasant","Newark","Newark Charter","Odessa","Padua","Polytech","Salesianum","Sanford","Seaford","Smyrna","St. Andrew's","Sussex Central","Tatnall","Tower Hill","Ursuline","William Penn","Wilmington Friends"]
+  },
+  "Golf": {
+    season: "Spring",
+    combined: ["A.I. du Pont","Appoquinimink","Archmere","Brandywine","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Concord","Conrad","Delcastle","Delmar","Delmarva Christian","DMA","Dover","Hodgson","Indian River","Lake Forest","Laurel","McKean","Middletown","Milford","MOT Charter","Mount Pleasant","Mt. Sophia Academy","Newark Charter","Odessa","Padua","Polytech","Saint Mark's","Salesianum","Sanford","Smyrna","St. Elizabeth","St. Georges","Sussex Academy","Sussex Central","Sussex Tech","Tatnall","Tower Hill","Ursuline","William Penn","Wilmington Friends","Woodbridge"]
+  }
+};
+
+const SPORTS = Object.keys(DATA_2027);
+
+function allSchools() {
+  const s = new Set();
+  SPORTS.forEach(sp => {
+    const d25 = DATA_2025[sp];
+    if (d25) {
+      if (d25.combined) d25.combined.forEach(x=>s.add(x));
+      else { if(d25.d1) d25.d1.forEach(x=>s.add(x)); if(d25.d2) d25.d2.forEach(x=>s.add(x)); }
+    }
+    DATA_2027[sp].d1.forEach(x=>s.add(x));
+    DATA_2027[sp].d2.forEach(x=>s.add(x));
+  });
+  Object.values(STATIC_SPORTS).forEach(d => {
+    if (d.combined) d.combined.forEach(x=>s.add(x));
+    else { if (d.d1) d.d1.forEach(x=>s.add(x)); if (d.d2) d.d2.forEach(x=>s.add(x)); }
+  });
+  Object.values(FOOTBALL).forEach(districts => Object.values(districts).forEach(arr => arr.forEach(x=>s.add(x))));
+  return [...s].sort((a,b)=>a.localeCompare(b));
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let era = "2027";
+let sport = "";
+
+// ── BY SPORT ──────────────────────────────────────────────────────────────────
+function buildSportSelect() {
+  const sel = document.getElementById("sport-select");
+  sel.innerHTML = '';
+  const blank = document.createElement("option");
+  blank.value = ""; blank.textContent = "Choose a sport\u2026";
+  blank.disabled = true; blank.selected = true;
+  sel.appendChild(blank);
+
+  // All sports organised by season, alphabetical within each season
+  // Changing sports use "change:" prefix; football is "football"; static use "static:" prefix
+  const seasons = ["Fall", "Winter", "Spring"];
+  const allBySeason = { Fall: [], Winter: [], Spring: [] };
+
+  SPORTS.forEach(s => allBySeason[DATA_2027[s].season].push({ key: "change:" + s, label: s }));
+  allBySeason["Fall"].push({ key: "football", label: "Football" });
+  Object.entries(STATIC_SPORTS).forEach(([sp, data]) => allBySeason[data.season].push({ key: "static:" + sp, label: sp }));
+
+  seasons.forEach(season => {
+    const items = allBySeason[season].sort((a,b) => a.label.localeCompare(b.label));
+    if (!items.length) return;
+    const og = document.createElement("optgroup");
+    og.label = season;
+    items.forEach(({ key, label }) => {
+      const o = document.createElement("option");
+      o.value = key; o.textContent = label;
+      og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+
+  sel.addEventListener("change", e => {
+    const v = e.target.value;
+    const eraRow = document.getElementById("era-toggle-row");
+    if (eraRow) eraRow.style.display = (v === "football" || v.startsWith("static:")) ? "none" : "";
+    if (v) renderSport(v);
+  });
+}
+
+function renderSport(val) {
+  const el = document.getElementById("sport-display");
+  el.innerHTML = "";
+
+  // ── Football ───────────────────────────────────────────────────────────────
+  if (val === "football") {
+    const note = document.createElement("div");
+    note.className = "note";
+    note.textContent = "No changes have been made to Delaware\u2019s three classification system, which went into effect in 2021.";
+    el.appendChild(note);
+    Object.entries(FOOTBALL).forEach(([cls, districts]) => {
+      const section = document.createElement("div");
+      section.style.cssText = "margin-bottom:var(--space-3)";
+      const hdr = document.createElement("div");
+      hdr.className = "div-head " + (cls==="3A" ? "d1" : cls==="2A" ? "d2" : "");
+      if (cls==="1A") { hdr.style.background = "var(--surface2)"; hdr.style.color = "var(--text)"; }
+      hdr.style.borderRadius = "var(--radius-sm) var(--radius-sm) 0 0";
+      hdr.textContent = "Class " + cls;
+      section.appendChild(hdr);
+      const grid = document.createElement("div");
+      grid.style.cssText = "display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--space-3);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:var(--space-3)";
+      Object.entries(districts).forEach(([dist, schools]) => {
+        const col = document.createElement("div");
+        const sorted = [...schools].sort((a,b)=>a.localeCompare(b));
+        col.innerHTML = '<div style="font-size:10px;font-weight:600;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em">District ' + dist + '</div>' +
+          sorted.map(s => '<div class="school-row">' + s + '</div>').join('');
+        grid.appendChild(col);
+      });
+      section.appendChild(grid);
+      el.appendChild(section);
+    });
+    return;
+  }
+
+  // ── Static sports ──────────────────────────────────────────────────────────
+  if (val.startsWith("static:")) {
+    const sport = val.slice(7);
+    const data = STATIC_SPORTS[sport];
+    const note = document.createElement("div");
+    note.className = "note";
+    note.textContent = "No changes have been made in sports that have both individual and team championship competition.";
+    el.appendChild(note);
+    const grid = document.createElement("div");
+    grid.className = "div-grid";
+    if (data.combined) {
+      const schools = [...data.combined].sort((a,b)=>a.localeCompare(b));
+      grid.innerHTML = '<div class="div-col" style="grid-column:1/-1"><div class="div-head" style="background:var(--surface2);color:var(--muted)">One Division \u2014 ' + schools.length + ' schools</div><div class="div-body" style="columns:2;column-gap:0">' + schools.map(s => '<div class="school-row" style="break-inside:avoid">' + s + '</div>').join('') + '</div></div>';
+    } else {
+      const d1 = [...data.d1].sort((a,b)=>a.localeCompare(b));
+      const d2 = [...data.d2].sort((a,b)=>a.localeCompare(b));
+      grid.innerHTML = '<div class="div-col"><div class="div-head d1">Division I \u2014 ' + d1.length + ' schools</div><div class="div-body">' + d1.map(s=>'<div class="school-row">'+s+'</div>').join('') + '</div></div>' +
+        '<div class="div-col"><div class="div-head d2">Division II \u2014 ' + d2.length + ' schools</div><div class="div-body">' + d2.map(s=>'<div class="school-row">'+s+'</div>').join('') + '</div></div>';
+    }
+    el.appendChild(grid);
+    return;
+  }
+
+  // ── Changing sports (2025-27 vs 2027-28) ──────────────────────────────────
+  const sport = val.startsWith("change:") ? val.slice(7) : val;
+  const activeEra = document.querySelector('.era-btn.active');
+  const era = activeEra ? activeEra.dataset.era : "2027";
+
+  if (era === "2025") {
+    const sport2025 = DATA_2025[sport];
+    if (!sport2025) return;
+    const isSingleDiv = !!sport2025.combined;
+    const note = document.createElement("div");
+    note.className = "note";
+    note.innerHTML = isSingleDiv
+      ? "Currently, this sport competes in <strong>one division</strong>."
+      : "Currently, schools are divided based on enrollment only. <strong>Division I threshold: 1,104 students.</strong>";
+    el.appendChild(note);
+    const grid = document.createElement("div");
+    grid.className = "div-grid";
+    if (isSingleDiv) {
+      const schools = [...sport2025.combined].sort((a,b)=>a.localeCompare(b));
+      grid.innerHTML = '<div class="div-col" style="grid-column:1/-1"><div class="div-head" style="background:var(--surface2);color:var(--muted)">One Division \u2014 ' + schools.length + ' schools</div><div class="div-body" style="columns:2;column-gap:0">' + schools.map(s=>'<div class="school-row" style="break-inside:avoid">'+s+'</div>').join('') + '</div></div>';
+    } else {
+      const d1 = [...sport2025.d1].sort((a,b)=>a.localeCompare(b));
+      const d2 = [...sport2025.d2].sort((a,b)=>a.localeCompare(b));
+      grid.innerHTML = '<div class="div-col"><div class="div-head d1">Division I \u2014 ' + d1.length + ' schools</div><div class="div-body">' + d1.map(s=>'<div class="school-row">'+s+'</div>').join('') + '</div></div>' +
+        '<div class="div-col"><div class="div-head d2">Division II \u2014 ' + d2.length + ' schools</div><div class="div-body">' + d2.map(s=>'<div class="school-row">'+s+'</div>').join('') + '</div></div>';
+    }
+    el.appendChild(grid);
+    return;
+  }
+
+  // 2027-28
+  const data27 = DATA_2027[sport];
+  if (!data27) return;
+  const isSingleDiv = data27.d2.length === 0;
+  const note = document.createElement("div");
+  note.className = "note";
+  note.innerHTML = isSingleDiv
+    ? "In 2027\u201328, this sport competes in <strong>one division</strong>."
+    : "Beginning in fall 2027, schools will be divided based on recent success and enrollment.";
+  el.appendChild(note);
+  const grid = document.createElement("div");
+  grid.className = "div-grid";
+  if (isSingleDiv) {
+    const schools = [...data27.d1].sort((a,b)=>a.localeCompare(b));
+    grid.innerHTML = '<div class="div-col" style="grid-column:1/-1"><div class="div-head" style="background:var(--surface2);color:var(--muted)">One Division \u2014 ' + schools.length + ' schools</div><div class="div-body" style="columns:2;column-gap:0">' + schools.map(s=>'<div class="school-row" style="break-inside:avoid">'+s+'</div>').join('') + '</div></div>';
+  } else {
+    const d1 = [...data27.d1].sort((a,b)=>a.localeCompare(b));
+    const d2 = [...data27.d2].sort((a,b)=>a.localeCompare(b));
+    grid.innerHTML = '<div class="div-col"><div class="div-head d1">Division I \u2014 ' + d1.length + ' schools</div><div class="div-body">' + d1.map(s=>'<div class="school-row">'+s+'</div>').join('') + '</div></div>' +
+      '<div class="div-col"><div class="div-head d2">Division II \u2014 ' + d2.length + ' schools</div><div class="div-body">' + d2.map(s=>'<div class="school-row">'+s+'</div>').join('') + '</div></div>';
+  }
+  el.appendChild(grid);
+}
+
+
+// ── BY SCHOOL ─────────────────────────────────────────────────────────────────
+function buildSchoolGrid(q = "") {
+  const grid = document.getElementById("school-grid");
+  const noR   = document.getElementById("no-results");
+  if (!q.trim()) { grid.innerHTML = ""; noR.style.display = "none"; return; }
+  const schools = allSchools().filter(s => s.toLowerCase().includes(q.toLowerCase()));
+  grid.innerHTML = "";
+  if (!schools.length) { noR.style.display = ""; return; }
+  noR.style.display = "none";
+
+  const orderedSports = [
+    ...SPORTS.map(sp => ({ sport: sp, season: DATA_2027[sp].season, type: 'change' })),
+    ...Object.entries(STATIC_SPORTS).map(([sp, d]) => ({ sport: sp, season: d.season, type: 'static' })),
+    { sport: 'Football', season: 'Fall', type: 'football' }
+  ].sort((a,b) => {
+    const seasonOrder = { Fall: 0, Winter: 1, Spring: 2 };
+    const sd = seasonOrder[a.season] - seasonOrder[b.season];
+    return sd !== 0 ? sd : a.sport.localeCompare(b.sport);
+  });
+
+  schools.forEach(school => {
+    let currentSeason = '';
+    const sportLines = orderedSports.map(item => {
+      if (item.type === 'football') {
+        let footballClass = '';
+        Object.entries(FOOTBALL).forEach(([cls, districts]) => {
+          Object.values(districts).forEach(arr => { if (arr.includes(school)) footballClass = cls; });
+        });
+        if (!footballClass) return null;
+        const seasonLabel = item.season !== currentSeason ? `<div class="sport-line" style="padding:10px 0 4px;border-bottom:none"><span class="sport-line-name" style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">${item.season}</span><span class="sport-line-right"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Old</span><span style="color:var(--faint);font-size:10px;margin:0 6px">→</span><span style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">New</span></span></div>` : '';
+        currentSeason = item.season;
+        return seasonLabel + `<div class="sport-line"><span class="sport-line-name">Football</span><span class="sport-line-right"><span class="badge">Class ${footballClass}</span></span></div>`;
+      }
+
+      const sp = item.sport;
+      let in25d1 = false, in25d2 = false, in25any = false, isSingle25 = false;
+      let in27d1 = false, in27d2 = false, isSingle27 = false;
+
+      if (item.type === 'change') {
+        const d25 = DATA_2025[sp];
+        if (!d25) return null;
+        in25d1 = !d25.combined && (d25.d1||[]).includes(school);
+        in25d2 = !d25.combined && (d25.d2||[]).includes(school);
+        in25any = d25.combined ? d25.combined.includes(school) : (in25d1||in25d2);
+        in27d1 = DATA_2027[sp].d1.includes(school);
+        in27d2 = DATA_2027[sp].d2.includes(school);
+        isSingle25 = !!d25.combined;
+        isSingle27 = DATA_2027[sp].d2.length === 0;
+      } else {
+        const data = STATIC_SPORTS[sp];
+        if (!data) return null;
+        in25d1 = !data.combined && (data.d1||[]).includes(school);
+        in25d2 = !data.combined && (data.d2||[]).includes(school);
+        in25any = data.combined ? data.combined.includes(school) : (in25d1||in25d2);
+        in27d1 = data.combined ? data.combined.includes(school) : in25d1;
+        in27d2 = data.combined ? false : in25d2;
+        isSingle25 = !!data.combined;
+        isSingle27 = !!data.combined;
+      }
+
+      if (!in25any && !in27d1 && !in27d2) return null;
+
+      let old_cls = '', old_txt = '—';
+      if (in25any) {
+        if (isSingle25) { old_cls = ''; old_txt = 'Comb.'; }
+        else if (in25d1) { old_cls = 'd1'; old_txt = 'D-I'; }
+        else { old_cls = 'd2'; old_txt = 'D-II'; }
+      }
+      let new_cls = '', new_txt = '';
+      if (isSingle27 && (in27d1||in27d2)) { new_cls = ''; new_txt = 'Comb.'; }
+      else if (in27d1) { new_cls = 'd1'; new_txt = 'D-I'; }
+      else if (in27d2) { new_cls = 'd2'; new_txt = 'D-II'; }
+      const changed = item.type === 'change' && !isSingle25 && !isSingle27 && old_txt !== new_txt && old_txt !== '—' && new_txt !== '';
+      const oldBadge = old_txt !== '—' ? ('<span class="badge ' + old_cls + '" style="' + (!old_cls ? 'background:var(--surface2);color:var(--muted);' : '') + '">' + old_txt + '</span><span style="color:var(--faint);font-size:10px;margin:0 2px">→</span>') : '';
+      const newBadge = new_txt ? `<span class="badge ${new_cls}" style="${!new_cls ? 'background:var(--surface2);color:var(--muted);' : ''}">${new_txt}</span>` : '';
+      const chgBadge = '';
+      const seasonLabel = item.season !== currentSeason ? `<div class="sport-line" style="padding:10px 0 4px;border-bottom:none"><span class="sport-line-name" style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">${item.season}</span><span class="sport-line-right"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Old</span><span style="color:var(--faint);font-size:10px;margin:0 6px">→</span><span style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">New</span></span></div>` : '';
+      currentSeason = item.season;
+      return seasonLabel + `<div class="sport-line"><span class="sport-line-name">${sp}</span><span class="sport-line-right">${oldBadge}${newBadge}${chgBadge}</span></div>`;
+    }).filter(Boolean).join('');
+
+    const card = document.createElement("div");
+    card.className = "school-card";
+    card.innerHTML = `<div class="sc-name">${school}</div><div class="sc-body">${sportLines || '<span style="font-size:11px;color:var(--faint)">No data</span>'}</div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ── OVERVIEW ──────────────────────────────────────────────────────────────────
+function buildOverview() {
+  const head = document.getElementById("ov-head");
+  const body = document.getElementById("ov-body");
+
+  // Headers
+  ["School"].concat(SPORTS).forEach((label, i) => {
+    const th = document.createElement("th");
+    th.textContent = label;
+    if (i > 0) th.title = DATA_2027[SPORTS[i-1]].season;
+    head.appendChild(th);
+  });
+
+  allSchools().forEach(school => {
+    const tr = document.createElement("tr");
+    const cells = [`<td>${school}</td>`];
+    SPORTS.forEach(sp => {
+      const d25 = DATA_2025[sp];
+      const in25d1 = !d25.combined && (d25.d1||[]).includes(school);
+      const in25d2 = !d25.combined && (d25.d2||[]).includes(school);
+      const in25any = d25.combined ? d25.combined.includes(school) : (in25d1||in25d2);
+      const in27d1 = DATA_2027[sp].d1.includes(school);
+      const in27d2 = DATA_2027[sp].d2.includes(school);
+      const isSingle25 = !!d25.combined;
+      if (!in25any && !in27d1 && !in27d2) { cells.push('<td><span class="mini na">—</span></td>'); return; }
+      const c25 = isSingle25 ? '<span class="mini" style="background:var(--surface2);color:var(--muted)">Comb.</span>'
+                  : (in25d1 ? '<span class="mini d1">D-I</span>' : '<span class="mini d2">D-II</span>');
+      const in27 = in27d1||in27d2;
+      const c27 = in27d1 ? '<span class="mini d1">D-I</span>' : (in27d2 ? '<span class="mini d2">D-II</span>' : '');
+      const sep = (in25any && in27) ? '<span style="color:var(--faint);font-size:9px;margin:0 1px">→</span>' : '';
+      cells.push(`<td>${c25}${sep}${c27}</td>`);
+    });
+    tr.innerHTML = cells.join('');
+    body.appendChild(tr);
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+(function(){
+  // Theme toggle
+  const toggle = document.querySelector("[data-theme-toggle]");
+  const html = document.documentElement;
+  let theme = matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light";
+  html.setAttribute("data-theme", theme);
+  toggle && toggle.addEventListener("click", () => {
+    theme = theme === "dark" ? "light" : "dark";
+    html.setAttribute("data-theme", theme);
+    toggle.innerHTML = theme === "dark"
+      ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`
+      : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+  });
+
+  // Tab switching
+  document.querySelectorAll(".nav-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".nav-tab").forEach(t => { t.classList.remove("active"); t.setAttribute("aria-selected","false"); });
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      tab.classList.add("active");
+      tab.setAttribute("aria-selected","true");
+      document.getElementById(`panel-${tab.dataset.tab}`).classList.add("active");
+    });
+  });
+
+  // Era toggle
+  document.querySelectorAll(".era-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".era-btn").forEach(b => { b.classList.remove("active"); b.setAttribute("aria-pressed","false"); });
+      btn.classList.add("active"); btn.setAttribute("aria-pressed","true");
+      era = btn.dataset.era;
+      const _sv = document.getElementById('sport-select').value; if (_sv) renderSport(_sv);
+    });
+  });
+
+  // School search
+  document.getElementById("school-search").addEventListener("input", e => buildSchoolGrid(e.target.value));
+
+  // Build all views
+  buildSportSelect();
+  const _sv = document.getElementById('sport-select').value; if (_sv) renderSport(_sv);
+  buildSchoolGrid("");
+  buildOverview();
+})();
+</script>
+</body>
+</html>
