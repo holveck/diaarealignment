@@ -770,7 +770,7 @@ function buildOverview() {
   // Theme toggle
   const toggle = document.querySelector("[data-theme-toggle]");
   const html = document.documentElement;
-  let theme = matchMedia("(prefers-color-scheme:light)").matches ? "dark" : "light";
+  let theme = "light";
   html.setAttribute("data-theme", theme);
   toggle && toggle.addEventListener("click", () => {
     theme = theme === "dark" ? "light" : "dark";
