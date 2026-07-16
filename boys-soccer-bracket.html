@@ -137,15 +137,17 @@ button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
       d1: { rounds: [
         { label:"First Round", matchups:[
           {top:{seed:9, name:"Appoquinimink",  record:"11-3",   prevSeed:"No. 5 D-I"},  bot:{seed:8, name:"Caesar Rodney",  record:"11-3-1", prevSeed:"No. 4 D-I"}},
+          {top:{seed:13,name:"Middletown",     record:"10-5",   prevSeed:"No. 8 D-I"},  bot:{seed:4, name:"Concord",        record:"13-1-1", prevSeed:"No. 2 D-II"}},
           {top:{seed:12,name:"Delcastle",      record:"9-5-1",  prevSeed:"No. 7 D-I"},  bot:{seed:5, name:"Cape Henlopen",  record:"12-2-1", prevSeed:"No. 3 D-I"}},
           {top:{seed:10,name:"Sussex Central", record:"11-4",   prevSeed:"No. 6 D-I"},  bot:{seed:7, name:"Sanford",        record:"11-2-2", prevSeed:"No. 4 D-II"}},
+          {top:{seed:14,name:"Indian River",   record:"9-4-1",  prevSeed:"No. 7 D-II"}, bot:{seed:3, name:"Salesianum",     record:"11-2-1", prevSeed:"No. 2 D-I"}},
           {top:{seed:11,name:"Brandywine",     record:"11-4",   prevSeed:"No. 5 D-II"}, bot:{seed:6, name:"Saint Mark's",  record:"12-1-1", prevSeed:"No. 3 D-II"}},
         ]},
         { label:"Quarterfinals", matchups:[
           {top:{seed:"",name:"",tbd:true}, bot:{seed:1,name:"St. Georges",    record:"15-0",   prevSeed:"No. 1 D-I"}},
-          {top:{seed:"",name:"",tbd:true}, bot:{seed:4,name:"Concord",        record:"13-1-1", prevSeed:"No. 2 D-II"}},
+          {top:{seed:"",name:"",tbd:true}, bot:{seed:"",name:"",tbd:true}},
           {top:{seed:"",name:"",tbd:true}, bot:{seed:2,name:"Sussex Academy", record:"13-2",   prevSeed:"No. 1 D-II"}},
-          {top:{seed:"",name:"",tbd:true}, bot:{seed:3,name:"Salesianum",     record:"11-2-1", prevSeed:"No. 2 D-I"}},
+          {top:{seed:"",name:"",tbd:true}, bot:{seed:"",name:"",tbd:true}},
         ]},
         { label:"Semifinals", matchups:[
           {top:{seed:"",name:"",tbd:true}, bot:{seed:"",name:"",tbd:true}},
@@ -157,16 +159,18 @@ button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
       ]},
       d2: { rounds: [
         { label:"First Round", matchups:[
-          {top:{seed:9, name:"Sussex Tech",        record:"6-8-1",  prevSeed:"D-I"},   bot:{seed:8, name:"DMA",                 record:"6-7-2",  prevSeed:"D-II"}},
-          {top:{seed:12,name:"Newark",             record:"5-9",    prevSeed:"D-II"},  bot:{seed:5, name:"Smyrna",              record:"7-8",    prevSeed:"D-I"}},
-          {top:{seed:10,name:"Archmere",           record:"6-8-1",  prevSeed:"D-II"},  bot:{seed:7, name:"Wilmington Christian", record:"7-8",    prevSeed:"D-II"}},
-          {top:{seed:11,name:"Odyssey Charter",    record:"5-7-3",  prevSeed:"D-II"},  bot:{seed:6, name:"Woodbridge",          record:"7-7-1",  prevSeed:"D-II"}},
+          {top:{seed:9, name:"Sussex Tech",       record:"6-8-1",  prevSeed:"D-I"},            bot:{seed:8, name:"DMA",                record:"6-7-2",  prevSeed:"D-II"}},
+          {top:{seed:13,name:"Howard",            record:"5-7-1",  prevSeed:"D-II"},           bot:{seed:4, name:"Seaford",            record:"6-5-2",  prevSeed:"D-II"}},
+          {top:{seed:12,name:"Newark",            record:"5-9",    prevSeed:"D-II"},           bot:{seed:5, name:"Smyrna",             record:"7-8",    prevSeed:"D-I"}},
+          {top:{seed:10,name:"Archmere",          record:"6-8-1",  prevSeed:"D-II"},           bot:{seed:7, name:"Wilmington Christian",record:"7-8",   prevSeed:"D-II"}},
+          {top:{seed:14,name:"Delmar",            record:"5-9",    prevSeed:"D-II"},           bot:{seed:3, name:"Wilmington Friends", record:"7-6-2",  prevSeed:"No. 11 D-II"}},
+          {top:{seed:11,name:"Odyssey Charter",   record:"5-7-3",  prevSeed:"D-II"},           bot:{seed:6, name:"Woodbridge",         record:"7-7-1",  prevSeed:"D-II"}},
         ]},
         { label:"Quarterfinals", matchups:[
-          {top:{seed:"",name:"",tbd:true}, bot:{seed:1,name:"St. Andrew's",       record:"11-4",   prevSeed:"No. 6 D-II"}},
-          {top:{seed:"",name:"",tbd:true}, bot:{seed:4,name:"Seaford",             record:"6-5-2",  prevSeed:"D-II"}},
-          {top:{seed:"",name:"",tbd:true}, bot:{seed:2,name:"Lake Forest",         record:"9-4-2",  prevSeed:"No. 8 D-II"}},
-          {top:{seed:"",name:"",tbd:true}, bot:{seed:3,name:"Wilmington Friends",  record:"7-6-2",  prevSeed:"No. 11 D-II"}},
+          {top:{seed:"",name:"",tbd:true}, bot:{seed:1,name:"St. Andrew's",    record:"11-4",   prevSeed:"No. 6 D-II"}},
+          {top:{seed:"",name:"",tbd:true}, bot:{seed:"",name:"",tbd:true}},
+          {top:{seed:"",name:"",tbd:true}, bot:{seed:2,name:"Lake Forest",      record:"9-4-2",  prevSeed:"No. 8 D-II"}},
+          {top:{seed:"",name:"",tbd:true}, bot:{seed:"",name:"",tbd:true}},
         ]},
         { label:"Semifinals", matchups:[
           {top:{seed:"",name:"",tbd:true}, bot:{seed:"",name:"",tbd:true}},
@@ -247,10 +251,30 @@ button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
     divData.rounds.forEach((round, ri) => {
       const firstCount = divData.rounds[0].matchups.length;
       const thisCount  = round.matchups.length;
-      const halvings   = firstCount > thisCount ? Math.round(Math.log2(firstCount / thisCount)) : 0;
       const unit       = CARD_H + CARD_GAP;
-      const paddingTop = halvings === 0 ? 0 : Math.round(unit * Math.pow(2, halvings - 1) - unit / 2);
-      const cardGap    = halvings === 0 ? CARD_GAP : Math.round(unit * Math.pow(2, halvings) - CARD_H);
+      let paddingTop, cardGap;
+      if (firstCount === 6) {
+        // 14-team bracket: distribute later rounds evenly over the same height as 6 first-round cards
+        const totalH = 6 * CARD_H + 5 * CARD_GAP; // 384px
+        if (thisCount === firstCount) {
+          paddingTop = 0; cardGap = CARD_GAP;
+        } else if (thisCount === 4) {
+          cardGap = Math.round((totalH - 4 * CARD_H) / 4); // 37
+          paddingTop = Math.round(cardGap / 2);             // 18
+        } else if (thisCount === 2) {
+          paddingTop = Math.round((totalH / 4) - CARD_H / 2); // 67
+          cardGap = totalH - 2 * CARD_H - 2 * paddingTop;    // 133 (but recalc from paddingTop)
+        } else if (thisCount === 1) {
+          paddingTop = Math.round(totalH / 2 - CARD_H / 2);  // 163
+          cardGap = 0;
+        } else {
+          paddingTop = 0; cardGap = CARD_GAP;
+        }
+      } else {
+        const halvings   = firstCount > thisCount ? Math.round(Math.log2(firstCount / thisCount)) : 0;
+        paddingTop = halvings === 0 ? 0 : Math.round(unit * Math.pow(2, halvings - 1) - unit / 2);
+        cardGap    = halvings === 0 ? CARD_GAP : Math.round(unit * Math.pow(2, halvings) - CARD_H);
+      }
 
       const col = document.createElement("div");
       col.className = "round";
