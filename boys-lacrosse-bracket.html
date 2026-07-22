@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIAA Boys Lacrosse Playoffs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root, [data-theme="light"] {
+  --bg:#f7f6f2;--surface:#ffffff;--surface2:#f3f0ec;
+  --border:oklch(from #28251d l c h / 0.12);--divider:oklch(from #28251d l c h / 0.07);
+  --text:#1a1916;--muted:#6b6a66;--faint:#b0afa9;
+  --primary:#01696f;--primary-hover:#0c4e54;--primary-text:#ffffff;
+  --d1-bg:#e4f2f1;--d1-fg:#015a5f;--d2-bg:#fdf0e6;--d2-fg:#7a3a10;
+  --win-bg:#eaf4ea;--win-fg:#1a5c1a;--loss-fg:var(--muted);
+  --r-sm:4px;--r-md:6px;--r-lg:10px;
+  --shadow:0 1px 3px oklch(0.2 0.01 80 / 0.09),0 4px 12px oklch(0.2 0.01 80 / 0.06);
+  --ease:160ms cubic-bezier(0.16,1,0.3,1);
+}
+[data-theme="dark"] {
+  --bg:#141311;--surface:#1c1b19;--surface2:#242320;
+  --border:oklch(from #cdccca l c h / 0.14);--divider:oklch(from #cdccca l c h / 0.07);
+  --text:#d0cfc9;--muted:#7a7975;--faint:#4e4d4a;
+  --primary:#4f98a3;--primary-hover:#3e8592;--primary-text:#0f1e20;
+  --d1-bg:#1b2e30;--d1-fg:#5db3bf;--d2-bg:#2a1e14;--d2-fg:#d4845a;
+  --win-bg:#1a2e1a;--win-fg:#7dca7d;--loss-fg:var(--faint);
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme]){--bg:#141311;--surface:#1c1b19;--surface2:#242320;--border:oklch(from #cdccca l c h / 0.14);--divider:oklch(from #cdccca l c h / 0.07);--text:#d0cfc9;--muted:#7a7975;--faint:#4e4d4a;--primary:#4f98a3;--primary-hover:#3e8592;--primary-text:#0f1e20;--d1-bg:#1b2e30;--d1-fg:#5db3bf;--d2-bg:#2a1e14;--d2-fg:#d4845a;--win-bg:#1a2e1a;--win-fg:#7dca7d;--loss-fg:var(--faint)}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;font-size:14px}
+body{font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5;color:var(--text);background:var(--bg)}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+.embed{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);font-size:13px}
+.controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px}
+.era-toggle{display:flex;border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;flex-shrink:0}
+.era-btn{padding:6px 10px;font-size:12px;font-weight:500;color:var(--muted);white-space:nowrap;transition:background var(--ease),color var(--ease)}
+.era-btn.active{background:var(--primary);color:var(--primary-text)}
+.era-btn:not(.active):hover{background:var(--surface2);color:var(--text)}
+.div-toggle{display:flex;border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;flex-shrink:0}
+.div-btn{padding:6px 10px;font-size:12px;font-weight:500;color:var(--muted);white-space:nowrap;transition:background var(--ease),color var(--ease)}
+.div-btn.active.d1{background:var(--d1-bg);color:var(--d1-fg);font-weight:600}
+.div-btn.active.d2{background:var(--d2-bg);color:var(--d2-fg);font-weight:600}
+.div-btn:not(.active):hover{background:var(--surface2);color:var(--text)}
+.bracket-scroll{padding:0 14px 14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.bracket-scroll::-webkit-scrollbar{height:4px}
+.bracket-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.bracket{display:flex;gap:0;align-items:flex-start;min-width:max-content}
+.round{display:flex;flex-direction:column;width:176px;flex-shrink:0}
+.round-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:0 6px 6px;white-space:nowrap;height:22px}
+.matchups{display:flex;flex-direction:column}
+.round-gap{width:10px;flex-shrink:0}
+.matchup{padding:0 6px}
+.matchup-inner{border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;background:var(--surface)}
+.team-row{display:flex;align-items:center;padding:4px 7px;gap:5px;border-bottom:1px solid var(--divider);min-height:28px}
+.team-row:last-child{border-bottom:none}
+.team-row.winner{background:var(--win-bg)}
+.team-row.loser{background:var(--surface2)}
+.team-row.tbd{background:var(--surface2);min-height:28px}
+.team-row.neutral{background:var(--surface)}
+.seed{font-size:11px;font-weight:700;color:var(--muted);min-width:18px;flex-shrink:0;font-variant-numeric:tabular-nums}
+.team-row.winner .seed{color:var(--win-fg)}
+.team-row.tbd .seed{visibility:hidden}
+.team-name{flex:1;font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.team-row.winner .team-name{color:var(--win-fg);font-weight:600}
+.team-row.loser .team-name{color:var(--loss-fg)}
+.team-row.tbd .team-name{display:none}
+.record{font-size:10px;color:var(--faint);flex-shrink:0}
+.prev-seed{font-size:10px;color:var(--faint);flex-shrink:0}
+.score{font-size:12px;font-weight:600;min-width:16px;text-align:right;font-variant-numeric:tabular-nums;flex-shrink:0}
+.team-row.winner .score{color:var(--win-fg)}
+.team-row.loser .score{color:var(--loss-fg)}
+.score-note{font-size:10px;color:var(--faint);font-weight:400;margin-left:2px;flex-shrink:0}
+.team-row.winner .score-note{color:var(--win-fg);opacity:.75}
+</style>
+</head>
+<body>
+<div class="embed" id="embed">
+  <div class="controls">
+    <div class="era-toggle" role="group" aria-label="Year">
+      <button class="era-btn active" data-era="2026" aria-pressed="true">2026 (Actual)</button>
+      <button class="era-btn" data-era="2028" aria-pressed="false">2028 (Projection)</button>
+    </div>
+    <div class="div-toggle" role="group" aria-label="Division" id="divToggle">
+      <button class="div-btn active d1" data-div="d1" aria-pressed="true">Division I</button>
+      <button class="div-btn d2" data-div="d2" aria-pressed="false">Division II</button>
+    </div>
+  </div>
+  <div class="bracket-scroll"><div class="bracket" id="bracket"></div></div>
+</div>
+
+<script>
+(function(){
+  const CARD_H = 59, CARD_GAP = 6;
+
+  const DATA = {
+    "2026": {
+      d1: { rounds: [
+        { label:"First Round", matchups:[
+          {top:{seed:16,name:"St. Georges",      record:"9-6",  score:1,win:false}, bot:{seed:1,name:"Salesianum",       record:"11-4", score:20,win:true}},
+          {top:{seed:9, name:"Indian River",     record:"12-3", score:5,win:false}, bot:{seed:8,name:"Archmere",         record:"9-6",  score:14,win:true}},
+          {top:{seed:13,name:"Tower Hill",       record:"8-7",  score:3,win:false}, bot:{seed:4,name:"St. Andrew's",     record:"13-2", score:11,win:true}},
+          {top:{seed:12,name:"Brandywine",       record:"12-3", score:5,win:false}, bot:{seed:5,name:"Caesar Rodney",    record:"10-5", score:18,win:true}},
+          {top:{seed:15,name:"Tatnall",          record:"6-9",  score:3,win:false}, bot:{seed:2,name:"Cape Henlopen",    record:"11-4", score:20,win:true}},
+          {top:{seed:10,name:"Polytech",         record:"10-5", score:9,win:false}, bot:{seed:7,name:"Newark Charter",   record:"13-2", score:13,win:true}},
+          {top:{seed:14,name:"Sussex Academy",   record:"8-7",  score:0,win:false}, bot:{seed:3,name:"Wilmington Friends",record:"14-1", score:15,win:true}},
+          {top:{seed:11,name:"Milford",          record:"9-6",  score:6,win:false}, bot:{seed:6,name:"Smyrna",           record:"11-4", score:14,win:true}},
+        ]},
+        { label:"Quarterfinals", matchups:[
+          {top:{seed:8,name:"Archmere",          score:2,win:false}, bot:{seed:1,name:"Salesianum",        score:19,win:true}},
+          {top:{seed:5,name:"Caesar Rodney",     score:4,win:false}, bot:{seed:4,name:"St. Andrew's",      score:11,win:true}},
+          {top:{seed:7,name:"Newark Charter",    score:4,win:false}, bot:{seed:2,name:"Cape Henlopen",     score:18,win:true}},
+          {top:{seed:6,name:"Smyrna",            score:7,win:true},  bot:{seed:3,name:"Wilmington Friends",score:5,win:false}},
+        ]},
+        { label:"Semifinals", matchups:[
+          {top:{seed:4,name:"St. Andrew's",  score:0,win:false}, bot:{seed:1,name:"Salesianum",    score:19,win:true}},
+          {top:{seed:6,name:"Smyrna",        score:5,win:false}, bot:{seed:2,name:"Cape Henlopen", score:18,win:true}},
+        ]},
+        { label:"Championship", matchups:[
+          {top:{seed:2,name:"Cape Henlopen", score:5,win:false}, bot:{seed:1,name:"Salesianum", score:15,win:true}},
+        ]},
+      ]},
+      d2: null,
+    },
+    "2028": {
+      d1: { rounds: [
+        { label:"First Round", matchups:[
+          {top:{seed:10,name:"Milford",        record:"9-6",  prevSeed:"No. 11"}, bot:{seed:8,name:"Indian River",    record:"12-3", prevSeed:"No. 9"}},
+          {top:{seed:9, name:"Polytech",       record:"10-5", prevSeed:"No. 10"}, bot:{seed:7,name:"Archmere",        record:"9-6",  prevSeed:"No. 8"}},
+        ]},
+        { label:"Quarterfinals", matchups:[
+          {top:{seed:"",name:"",tbd:true}, bot:{seed:1,name:"Salesianum",        record:"11-4", prevSeed:"No. 1"}},
+          {top:{seed:5,name:"Caesar Rodney", record:"10-5", prevSeed:"No. 5"}, bot:{seed:4,name:"St. Andrew's",      record:"13-2", prevSeed:"No. 4"}},
+          {top:{seed:"",name:"",tbd:true}, bot:{seed:2,name:"Cape Henlopen",     record:"11-4", prevSeed:"No. 2"}},
+          {top:{seed:6,name:"Smyrna",        record:"11-4", prevSeed:"No. 6"}, bot:{seed:3,name:"Wilmington Friends",record:"14-1", prevSeed:"No. 3"}},
+        ]},
+        { label:"Semifinals", matchups:[
+          {top:{seed:"",name:"",tbd:true}, bot:{seed:"",name:"",tbd:true}},
+          {top:{seed:"",name:"",tbd:true}, bot:{seed:"",name:"",tbd:true}},
+        ]},
+        { label:"Championship", matchups:[
+          {top:{seed:"",name:"",tbd:true}, bot:{seed:"",name:"",tbd:true}},
+        ]},
+      ]},
+      d2: { rounds: [
+        { label:"First Round", matchups:[
+          {top:{seed:10,name:"Concord",      record:"5-10", prevSeed:""},        bot:{seed:8,name:"FSMA",                 record:"6-8", prevSeed:""}},
+          {top:{seed:9, name:"Sussex Tech",  record:"6-9",  prevSeed:""},        bot:{seed:7,name:"Red Lion Christian",  record:"7-8", prevSeed:""}},
+        ]},
+        { label:"Quarterfinals", matchups:[
+          {top:{seed:"",name:"",tbd:true}, bot:{seed:1,name:"Newark Charter",       record:"13-2", prevSeed:"No. 7"}},
+          {top:{seed:5,name:"Wilmington Christian",record:"8-7", prevSeed:""},   bot:{seed:4,name:"Conrad",               record:"8-7", prevSeed:""}},
+          {top:{seed:"",name:"",tbd:true}, bot:{seed:2,name:"Tower Hill",           record:"8-7",  prevSeed:"No. 13"}},
+          {top:{seed:6,name:"Delmar",       record:"7-8",  prevSeed:""},        bot:{seed:3,name:"DMA",                  record:"9-6", prevSeed:""}},
+        ]},
+        { label:"Semifinals", matchups:[
+          {top:{seed:"",name:"",tbd:true}, bot:{seed:"",name:"",tbd:true}},
+          {top:{seed:"",name:"",tbd:true}, bot:{seed:"",name:"",tbd:true}},
+        ]},
+        { label:"Championship", matchups:[
+          {top:{seed:"",name:"",tbd:true}, bot:{seed:"",name:"",tbd:true}},
+        ]},
+      ]},
+    },
+  };
+
+  let era = "2026", div = "d1";
+
+  function buildRow(team, showScore) {
+    const row = document.createElement("div");
+    const cls = team.tbd ? "tbd" : showScore ? (team.win ? "winner" : "loser") : "neutral";
+    row.className = "team-row " + cls;
+    if (!team.tbd && team.name) row.title = team.name;
+
+    const seedEl = document.createElement("span");
+    seedEl.className = "seed";
+    seedEl.textContent = (team.seed !== "" && team.seed != null) ? String(team.seed) : " ";
+    row.appendChild(seedEl);
+
+    if (!team.tbd) {
+      const nameEl = document.createElement("span");
+      nameEl.className = "team-name";
+      nameEl.textContent = team.name || "";
+      if (team.name) nameEl.title = team.name;
+      row.appendChild(nameEl);
+
+      if (showScore && team.record) {
+        const rec = document.createElement("span");
+        rec.className = "record";
+        rec.textContent = team.record;
+        row.appendChild(rec);
+      }
+      if (!showScore && team.prevSeed) {
+        const ps = document.createElement("span");
+        ps.className = "prev-seed";
+        ps.textContent = "(" + team.prevSeed + ")";
+        row.appendChild(ps);
+      }
+      if (showScore && typeof team.score !== "undefined") {
+        const sc = document.createElement("span");
+        sc.className = "score";
+        sc.textContent = team.score;
+        row.appendChild(sc);
+      }
+    }
+    return row;
+  }
+
+  function render() {
+    const bracketEl = document.getElementById("bracket");
+    const divToggle = document.getElementById("divToggle");
+    const eraData = DATA[era];
+    const d2ok = eraData.d2 !== null && eraData.d2 !== undefined;
+    divToggle.style.display = d2ok ? "" : "none";
+    if (!d2ok) div = "d1";
+    const divData = eraData[div];
+    if (!divData) return;
+    const showScore = era === "2026";
+    bracketEl.innerHTML = "";
+
+    divData.rounds.forEach((round, ri) => {
+      const refCount = Math.max(...divData.rounds.map(r => r.matchups.length));
+      const firstCount = divData.rounds[0].matchups.length;
+      const thisCount  = round.matchups.length;
+      const unit = CARD_H + CARD_GAP;
+      let paddingTop, cardGap;
+
+      if (refCount === 4 && firstCount <= 2) {
+        const totalH = 4 * CARD_H + 3 * CARD_GAP;
+        if (thisCount === 4) {
+          paddingTop = 0; cardGap = CARD_GAP;
+        } else if (thisCount === 2) {
+          paddingTop = Math.round(totalH / 4 - CARD_H / 2);
+          cardGap = totalH - 2 * CARD_H - 2 * paddingTop;
+        } else if (thisCount === 1) {
+          paddingTop = Math.round(totalH / 2 - CARD_H / 2);
+          cardGap = 0;
+        } else {
+          paddingTop = 0; cardGap = CARD_GAP;
+        }
+      } else if (firstCount === 2) {
+        const totalH = 2 * CARD_H + 1 * CARD_GAP;
+        if (thisCount === 2) {
+          paddingTop = 0; cardGap = CARD_GAP;
+        } else if (thisCount === 4) {
+          paddingTop = 0; cardGap = CARD_GAP;
+        } else if (thisCount === 1) {
+          paddingTop = Math.round(totalH / 2 - CARD_H / 2);
+          cardGap = 0;
+        } else {
+          paddingTop = 0; cardGap = CARD_GAP;
+        }
+      } else {
+        const halvings = firstCount > thisCount ? Math.round(Math.log2(firstCount / thisCount)) : 0;
+        paddingTop = halvings === 0 ? 0 : Math.round(unit * Math.pow(2, halvings - 1) - unit / 2);
+        cardGap = halvings === 0 ? CARD_GAP : Math.round(unit * Math.pow(2, halvings) - CARD_H);
+      }
+
+      const col = document.createElement("div");
+      col.className = "round";
+
+      const lbl = document.createElement("div");
+      lbl.className = "round-label";
+      lbl.textContent = round.label;
+      col.appendChild(lbl);
+
+      const muWrap = document.createElement("div");
+      muWrap.className = "matchups";
+      muWrap.style.paddingTop = paddingTop + "px";
+      muWrap.style.gap = cardGap + "px";
+      muWrap.style.display = "flex";
+      muWrap.style.flexDirection = "column";
+
+      round.matchups.forEach(mu => {
+        const card = document.createElement("div");
+        card.className = "matchup";
+        const inner = document.createElement("div");
+        inner.className = "matchup-inner";
+        inner.appendChild(buildRow(mu.top, showScore));
+        inner.appendChild(buildRow(mu.bot, showScore));
+        card.appendChild(inner);
+        muWrap.appendChild(card);
+      });
+
+      col.appendChild(muWrap);
+      bracketEl.appendChild(col);
+      if (ri < divData.rounds.length - 1) {
+        const gap = document.createElement("div");
+        gap.className = "round-gap";
+        bracketEl.appendChild(gap);
+      }
+    });
+  }
+
+  document.querySelectorAll(".era-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".era-btn").forEach(b => { b.classList.remove("active"); b.setAttribute("aria-pressed","false"); });
+      btn.classList.add("active"); btn.setAttribute("aria-pressed","true");
+      era = btn.dataset.era; render();
+    });
+  });
+  document.querySelectorAll(".div-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".div-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active"); div = btn.dataset.div; render();
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
