@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swim Clubs in Northern New Castle County</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root, [data-theme="light"] {
+  --bg:#f7f6f2;--surface:#ffffff;--surface2:#f3f0ec;
+  --border:oklch(from #28251d l c h / 0.12);--divider:oklch(from #28251d l c h / 0.07);
+  --text:#1a1916;--muted:#6b6a66;--faint:#b0afa9;
+  --primary:#01696f;--primary-hover:#0c4e54;--primary-text:#ffffff;
+  --d1-bg:#e4f2f1;--d1-fg:#015a5f;--d2-bg:#fdf0e6;--d2-fg:#7a3a10;
+  --win-bg:#eaf4ea;--win-fg:#1a5c1a;
+  --r-sm:4px;--r-md:6px;--r-lg:10px;
+  --shadow:0 1px 3px oklch(0.2 0.01 80 / 0.09),0 4px 12px oklch(0.2 0.01 80 / 0.06);
+  --ease:160ms cubic-bezier(0.16,1,0.3,1);
+}
+[data-theme="dark"] {
+  --bg:#141311;--surface:#1c1b19;--surface2:#242320;
+  --border:oklch(from #cdccca l c h / 0.14);--divider:oklch(from #cdccca l c h / 0.07);
+  --text:#d0cfc9;--muted:#7a7975;--faint:#4e4d4a;
+  --primary:#4f98a3;--primary-hover:#3e8592;--primary-text:#0f1e20;
+  --d1-bg:#1b2e30;--d1-fg:#5db3bf;--d2-bg:#2a1e14;--d2-fg:#d4845a;
+  --win-bg:#1a2e1a;--win-fg:#7dca7d;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme]){--bg:#141311;--surface:#1c1b19;--surface2:#242320;--border:oklch(from #cdccca l c h / 0.14);--divider:oklch(from #cdccca l c h / 0.07);--text:#d0cfc9;--muted:#7a7975;--faint:#4e4d4a;--primary:#4f98a3;--primary-hover:#3e8592;--primary-text:#0f1e20;--d1-bg:#1b2e30;--d1-fg:#5db3bf;--d2-bg:#2a1e14;--d2-fg:#d4845a;--win-bg:#1a2e1a;--win-fg:#7dca7d}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;font-size:14px}
+body{font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5;color:var(--text);background:var(--bg)}
+button,input{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+.embed{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);font-size:13px;max-width:900px;margin:0 auto}
+.header{padding:14px 16px 10px;border-bottom:1px solid var(--divider)}
+.title{font-size:15px;font-weight:700;color:var(--text)}
+.subtitle{font-size:12px;color:var(--muted);margin-top:2px}
+.controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--divider)}
+.search-box{flex:1;min-width:160px}
+.search-box input{width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);font-size:12px;color:var(--text)}
+.search-box input:focus{outline:2px solid var(--primary);outline-offset:-1px}
+.filter-toggle{display:flex;border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;flex-shrink:0}
+.filter-btn{padding:6px 10px;font-size:12px;font-weight:500;color:var(--muted);white-space:nowrap;transition:background var(--ease),color var(--ease)}
+.filter-btn.active{background:var(--primary);color:var(--primary-text)}
+.filter-btn:not(.active):hover{background:var(--surface2);color:var(--text)}
+#map{height:540px;width:100%}
+.legend{display:flex;gap:14px;flex-wrap:wrap;padding:8px 14px;border-top:1px solid var(--divider);font-size:11px;color:var(--muted)}
+.legend-item{display:flex;align-items:center;gap:5px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--border)}
+.leaflet-popup-content-wrapper{background:var(--surface);color:var(--text);border-radius:var(--r-md);box-shadow:var(--shadow)}
+.leaflet-popup-tip{background:var(--surface)}
+.popup-title{font-weight:700;font-size:13px;margin-bottom:2px}
+.popup-meta{font-size:11.5px;color:var(--muted);line-height:1.5}
+.popup-link{color:var(--primary);font-weight:600;font-size:11.5px;text-decoration:none}
+.leaflet-tooltip{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--r-sm);font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;box-shadow:var(--shadow);padding:4px 8px}
+.footer-note{padding:8px 14px;font-size:10.5px;color:var(--faint);border-top:1px solid var(--divider)}
+.reset-view-btn{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--r-sm);padding:6px 10px;font-size:12px;font-weight:600;box-shadow:var(--shadow);transition:background var(--ease)}
+.reset-view-btn:hover{background:var(--surface2)}
+@media (max-width:700px){ #map{height:420px} }
+</style>
+</head>
+<body>
+<div class="embed" id="embed">
+  <div class="header">
+    <div class="title">Swim clubs in northern New Castle County</div>
+    <div class="subtitle">Hover on a marker for the name. Click for full details.</div>
+  </div>
+  <div id="map"></div>
+  <div class="legend">
+    <span class="legend-item"><span class="dot" style="background:#d1a600"></span>Suburban</span>
+    <span class="legend-item"><span class="dot" style="background:#1569b3"></span>North Brandywine</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  const POOLS = [
+    {name:"Nottingham Green",address:"200 Radcliffe Dr, Newark, DE 19711",type:"suburban",lat:39.684998,lng:-75.771536,phone:null,website:"https://nottinghamswimclub.com"},
+    {name:"Westminster",address:"3200 Heritage Dr,\u00a0Wilmington, DE \u00a019808",type:"suburban",lat:39.755155,lng:-75.653958,phone:"(302) 729-3445",website:"https://westminsterswimclub.com"},
+    {name:"Drummond Hill",address:"24 Alton Rd, Newark, DE 19711",type:"suburban",lat:39.716562,lng:-75.709758,phone:"(302) 366-9882",website:"https://drummondhillpool.org"},
+    {name:"North Star",address:"100 Saturn Dr, Newark, DE 19711",type:"suburban",lat:39.752509,lng:-75.720132,phone:"(302) 239-7611",website:"https://northstarpool.org"},
+    {name:"Oaklands",address:"301 Hillside Rd, Newark, DE 19717",type:"suburban",lat:39.680916,lng:-75.760486,phone:"(302) 366-1812",website:"https://oaklandspool.com"},
+    {name:"Wedgewood",address:"2A Wedgefield Dr, New Castle, DE 19720",type:"suburban",lat:39.661424,lng:-75.645346,phone:"(302) 328-9736",website:"https://wedgewoodpool.com"},
+    {name:"Western YMCA",address:"2600 Capitol Tr, Newark, DE 19711",type:"suburban",lat:39.704704,lng:-75.6851,phone:"(302) 709-9622",website:null},
+    {name:"Yorklyn",address:"389 Lower Snuff Mill Road, Hockessin, DE 19707",type:"suburban",lat:39.813011,lng:-75.671351,phone:"(302) 239-3238",website:"https://yorklynpool.com"},
+    {name:"Arundel",address:"1228 Elderon Dr, Wilmington, DE 19808",type:"suburban",lat:39.737559,lng:-75.670516,phone:"(302) 482-3091",website:"https://arundelswimclub.com"},
+    {name:"Crestmoor",address:"640 W Summit Ave, Wilmington, DE 19804",type:"suburban",lat:39.729348,lng:-75.601754,phone:"(302) 994-1715",website:"https://crestmoorswimclubdelaware.com"},
+    {name:"Fairfield",address:"1 Fremont Rd, Newark, DE 19711",type:"suburban",lat:39.694605,lng:-75.763025,phone:"(302) 592-4158",website:"https://ffcpool.com"},
+    {name:"Maple Valley",address:"8 Old Possum Park Rd, Newark, DE 19711",type:"suburban",lat:39.697383,lng:-75.719111,phone:"(302) 739-3691",website:"https://maplevalleyswimclub.org"},
+    {name:"Oakwood Valley",address:"4909 Kirkwood Hwy, Wilmington, DE 19808",type:"suburban",lat:39.721995,lng:-75.665456,phone:"(302) 234-8500",website:"https://amspools.com/swim-club"},
+    {name:"Penn Acres",address:"30 Fithian Dr, New Castle, DE 19720",type:"suburban",lat:39.682276,lng:-75.585351,phone:"(302) 322-6501",website:"https://pennacresswimclub.org"},
+    {name:"Persimmon Creek",address:"428 Arbour Dr, Newark, DE 19713",type:"suburban",lat:39.658154,lng:-75.770561,phone:"(302) 829-3922",website:"https://pcswimclub.com"},
+    {name:"Sherwood Park",address:"1105 Highgate Rd, Wilmington, DE 19808",type:"suburban",lat:39.738005,lng:-75.664382,phone:"(302) 510-8874",website:"https://sherwoodparkswimclub.org"},
+    {name:"Skyline",address:"2901 Skyline Dr, Wilmington, DE 19808",type:"suburban",lat:39.725528,lng:-75.687354,phone:"(302) 737-4696",website:"https://skylineswimclubde.com"},
+    {name:"Crestview",address:"1000 Faun Rd, Wilmington, DE 19803",type:"north-brandywine",lat:39.794773,lng:-75.515473,phone:"(302) 478-9813",website:"https://crestviewpool.com"},
+    {name:"Fair Blue",address:"2005 Fairblue Ln, Wilmington, DE 19810",type:"north-brandywine",lat:39.816815,lng:-75.514407,phone:"(302) 475-8133",website:"https://fairblueclub.com"},
+    {name:"Graylyn Crest",address:"2002 Marsh Rd, Wilmington, DE 19810",type:"north-brandywine",lat:39.809081,lng:-75.50022,phone:null,website:"https://graylyncrestswimclub.membershiptoolkit.com"},
+    {name:"Lane",address:"2100 Shipley Rd, Wilmington, DE 19803",type:"north-brandywine",lat:39.798327,lng:-75.535147,phone:"(302) 652-9526",website:"https://gomotionapp.com/team/reclsc/page/home"},
+    {name:"Silverside",address:"3200 Silverside Rd, Wilmington, DE 19810",type:"north-brandywine",lat:39.808939,lng:-75.530593,phone:"(302) 478-9965",website:"https://silversideswimclub.com"},
+    {name:"Ashbourne",address:"900 Darley Rd, Wilmington, DE 19810",type:"north-brandywine",lat:39.815031,lng:-75.470572,phone:"(302) 475-1004",website:"https://ashbourneswimclub.com"},
+    {name:"Elks",address:"1310 Carruthers Ln, Wilmington, DE 19803",type:"north-brandywine",lat:39.769167,lng:-75.536735,phone:"(302) 652-0313",website:"https://elksswimclub.membersplash.com"},
+    {name:"Siegel JCC",address:"101 Garden of Eden Rd, Wilmington, DE 19803",type:"north-brandywine",lat:39.810448,lng:-75.554614,phone:"(302) 478-5660",website:"https://siegeljcc.org/sharks"},
+    {name:"River Road",address:"201 River Rd, Wilmington, DE 19809",type:"north-brandywine",lat:39.759584,lng:-75.501286,phone:"(302) 764-6454",website:"https://riverroadswim.com"},
+    {name:"Shellcrest",address:"1 Shellcrest Ln, Wilmington, DE 19803",type:"north-brandywine",lat:39.792077,lng:-75.5162,phone:"(302) 764-4456",website:null},
+    {name:"Timber Lane",address:"105 Timber Ln, Wilmington, DE 19803",type:"north-brandywine",lat:39.781676,lng:-75.510586,phone:"(302) 764-9988",website:"https://timberlaneswimclub.com"},
+    {name:"Windybush",address:"1635 Windybush Rd, Wilmington, DE 19810",type:"north-brandywine",lat:39.801825,lng:-75.487702,phone:"(302) 475-9853",website:"https://windybushswimclub.com"},
+    {name:"Arden",address:"2126 The Hwy, Wilmington, DE 19810",type:"north-brandywine",lat:39.809801,lng:-75.488344,phone:null,website:"https://ardenswimclub.org"},
+    {name:"Darley",address:"1502 Naamans Rd, Wilmington, DE 19810",type:"north-brandywine",lat:39.819192,lng:-75.477559,phone:"(302) 475-9808",website:"https://darleyswimclub.com"},
+    {name:"Green Acres",address:"1204 Grinnell Rd, Wilmington, DE 19803",type:"north-brandywine",lat:39.793508,lng:-75.50034,phone:"(302) 385-6999",website:"https://greenacresswimclub.com"},
+    {name:"Del Vets",address:"2535 Veterans Dr, Wilmington, DE 19810",type:"north-brandywine",lat:39.829889,lng:-75.50993,phone:"(302) 475-9891",website:"https://delvets.com"},
+    {name:"High Point",address:"1819 Foulk Rd, Wilmington, DE 19810",type:"north-brandywine",lat:39.810984,lng:-75.514278,phone:"(302) 475-3595",website:"https://highpointpool.com"},
+    {name:"Tatnall",address:"1501 Barley Mill Rd, Wilmington, DE 19807",type:"north-brandywine",lat:39.76852,lng:-75.618184,phone:"(302) 998-2292",website:"https://tatnall.org"}
+  ];
+
+  const typeColors = { suburban:"#d1a600", "north-brandywine":"#1569b3" };
+  const typeLabels = { suburban:"Suburban", "north-brandywine":"North Brandywine" };
+
+  const map = L.map('map', { scrollWheelZoom:false }).setView([39.745,-75.62], 11);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution:'&copy; OpenStreetMap contributors &copy; CARTO',
+    maxZoom: 19
+  }).addTo(map);
+
+  function makeIcon(type){
+    const c = typeColors[type] || "#01696f";
+    return L.divIcon({
+      className:'',
+      html:`<div style="width:16px;height:16px;border-radius:50%;background:${c};border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35)"></div>`,
+      iconSize:[16,16], iconAnchor:[8,8]
+    });
+  }
+
+  const markers = [];
+
+  POOLS.forEach((p) => {
+    const marker = L.marker([p.lat,p.lng], { icon: makeIcon(p.type) }).addTo(map);
+    marker.bindTooltip(p.name, { direction:'top', offset:[0,-10] });
+    const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.address)}`;
+    marker.bindPopup(`
+      <div class="popup-title">${p.name}</div>
+      <div class="popup-meta">${p.address}${p.phone ? '<br>'+p.phone : ''}</div>
+      <div style="margin-top:4px;display:flex;gap:10px;">
+        <a class="popup-link" href="${dirUrl}" target="_blank" rel="noopener noreferrer">Get directions →</a>
+        ${p.website ? `<a class="popup-link" href="${p.website}" target="_blank" rel="noopener noreferrer">Website →</a>` : ''}
+      </div>
+    `);
+    markers.push({marker, data:p});
+  });
+
+  const DEFAULT_CENTER = [39.745,-75.62];
+  const DEFAULT_ZOOM = 11;
+  const ResetControl = L.Control.extend({
+    options: { position: 'topleft' },
+    onAdd: function() {
+      const btn = L.DomUtil.create('button', 'reset-view-btn');
+      btn.innerHTML = 'Reset';
+      btn.title = 'Reset map view';
+      L.DomEvent.disableClickPropagation(btn);
+      L.DomEvent.on(btn, 'click', () => { map.setView(DEFAULT_CENTER, DEFAULT_ZOOM, { animate:true }); });
+      return btn;
+    }
+  });
+  map.addControl(new ResetControl());
+})();
+</script>
+</body>
+</html>
