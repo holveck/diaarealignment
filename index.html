@@ -311,7 +311,7 @@ const DATA_2025 = {
   "Boys Soccer": {
     season: "Fall",
     d1: ["Appoquinimink","Caesar Rodney","Cape Henlopen","Charter of Wilmington","Christiana","Delcastle","Dover","Hodgson","Middletown","Milford","Odessa","Polytech","Salesianum","Smyrna","St. Georges","Sussex Central","Sussex Tech","William Penn"],
-    d2: ["A.I. du Pont","Archmere","Aspira","Caravel","Concord","Conrad","Delmar","Delmarva Christian","DMA","Dickinson","Glasgow","Howard","Indian River","Lake Forest","Laurel","McKean","MOT Charter","Mount Pleasant","Newark","Newark Charter","Odyssey Charter","Red Lion Christian","Sanford","Seaford","St. Andrew's","St. Elizabeth","Sussex Academy","Tatnall","Tower Hill","Wilmington Christian","Wilmington Friends","Woodbridge","Saint Mark's"]
+    d2: ["A.I. du Pont","Archmere","Aspira","Brandywine","Caravel","Concord","Conrad","Delmar","Delmarva Christian","DMA","Dickinson","Glasgow","Howard","Indian River","Lake Forest","Laurel","McKean","MOT Charter","Mount Pleasant","Newark","Newark Charter","Odyssey Charter","Red Lion Christian","Sanford","Seaford","St. Andrew's","St. Elizabeth","Sussex Academy","Tatnall","Tower Hill","Wilmington Christian","Wilmington Friends","Woodbridge","Saint Mark's"]
   },
   "Girls Volleyball": {
     season: "Fall",
@@ -344,7 +344,7 @@ const DATA_2025 = {
   },
   "Softball": {
     season: "Spring",
-    combined: ["Appoquinimink","Archmere","Brandywine","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Christiana","Concord","Conrad","Delcastle","Delmar","Delmarva Christian","Dickinson","DMA","Dover","Early College@DSU","First State Military Academy","Glasgow","Hodgson","Indian River","Lake Forest","Laurel","McKean","Middletown","Milford","MOT Charter","Mount Pleasant","Newark","Newark Charter","Odessa","Odyssey Charter","Padua","Polytech","Red Lion Christian","Sanford","Seaford","Smyrna","St. Georges","Saint Mark's","Sussex Academy","Sussex Central","Sussex Tech","Ursuline","William Penn","Woodbridge","Charter of Wilmington"]
+    combined: ["Appoquinimink","Archmere","Brandywine","Caesar Rodney","Cape Henlopen","Caravel","Charter of Wilmington","Christiana","Concord","Conrad","Delcastle","Delmar","Delmarva Christian","Dickinson","DMA","Dover","Early College@DSU","First State Military Academy","Glasgow","Hodgson","Indian River","Lake Forest","Laurel","McKean","Middletown","Milford","MOT Charter","Mount Pleasant","Newark","Newark Charter","Odessa","Odyssey Charter","Padua","Polytech","Red Lion Christian","Seaford","Smyrna","St. Georges","Saint Mark's","Sussex Academy","Sussex Central","Sussex Tech","Ursuline","William Penn","Woodbridge","Charter of Wilmington"]
   },
   "Boys Volleyball": {
     season: "Spring",
@@ -770,7 +770,7 @@ function buildOverview() {
   // Theme toggle
   const toggle = document.querySelector("[data-theme-toggle]");
   const html = document.documentElement;
-  let theme = "light";
+  let theme = matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light";
   html.setAttribute("data-theme", theme);
   toggle && toggle.addEventListener("click", () => {
     theme = theme === "dark" ? "light" : "dark";
